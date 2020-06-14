@@ -77,4 +77,4 @@ $router->post('/studentpapers', 'StudentPaperController@store');
 $router->put('/studentpapers/{id}', 'StudentPaperController@update');
 $router->patch('/studentpapers/{id}', 'StudentPaperController@update');
 $router->delete('/studentpapers/{id}', 'StudentPaperController@delete');
-
+$router->get('/studentpapers/markscript/{studentid}/{id}', 'StudentPaperController@markScript');

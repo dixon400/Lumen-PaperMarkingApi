@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Paper;
+use App\StudentPaper;
 
 
 class Answer extends Model 
@@ -17,7 +18,6 @@ class Answer extends Model
          'subject_id',
          'paper_id',
          'status_id',
-         'question',
          'answer'
     ];
 

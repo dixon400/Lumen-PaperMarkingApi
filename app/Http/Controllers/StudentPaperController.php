@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Answer;
 use App\Paper;
 use App\Student;
 use App\StudentPaper;
-use App\Answer;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,14 +19,11 @@ class StudentPaperController extends Controller
      * @return void
      */
 
-    public $answer;
-    public $papertype;
-    public $markingGuide;
+    public $studentscript;
 
-    public function __construct(AnswerController $answer, PaperTypeController $papertype)
+    public function __construct()
     {
-        $this->papertype = $papertype;
-        $this->answer = $answer;
+
     }
 
     /**
@@ -46,7 +43,6 @@ class StudentPaperController extends Controller
      *
      * @return Illuminate\Http\Response
      */
-
     public function show($id)
     {
         $studentPaper = StudentPaper::findorfail($id);
@@ -69,10 +65,6 @@ class StudentPaperController extends Controller
 
         $this->validate($request, $rules);
         $studentPaper = StudentPaper::create($request->all());
-
-       // $answer = Answer::findorfail($studentPaper['answer_id']);
-       // $papertype = PaperType::findorfail($studentPaper['papertype_id']);
-        
 
         return $this->successResponse($studentPaper, Response::HTTP_CREATED);
     }
@@ -118,14 +110,67 @@ class StudentPaperController extends Controller
 
     }
 
+    public function setpaper($script)
+    {
+
+    }
+
     /**
      * Marking a student paper
      *
      * @return Illuminate\Http\Response
      */
-
-    public function markScript()
+    public function markScript($studentid, $id)
     {
+        /**
+         * Get student's input
+         * Convert to answers by eliminating digit
+         * convert to an array
+         */
+        $paper = Paper::findorfail($id);
+        $studentpaper = Answer::findorfail($paper['id']);
+        $studentscript = $studentpaper['answer'];
+        $studentscript = preg_replace('/[\d,]+/', '', $studentscript);
+        $studentscript = explode(';', $studentscript);
+        $studentid = Student::findorfail($studentid);
+        $studentresult = StudentPaper::findorfail($studentid['id']);
+        $studentid = $studentresult['student_id'];
+
+        /**
+         * Get corresponding marking guide
+         * convert to an array
+         */
+
+        $guide = Paper::findorfail(!($paper['paper_type']));
+        $markingguide = Answer::findorfail($guide['id']);
+        $markingguide = ($markingguide['answer']);
+        $markingguide = preg_replace('/[\d,]+/', '', $markingguide);
+        $markingguide = explode(';', $markingguide);
+
+        /**
+         * Compare both
+         * output result
+         */
+        $correct = 0;
+        for ($i = 0; $i < count($studentscript); $i++) {
+
+            if ($studentscript[$i] == $markingguide[$i]) {
+
+                $correct++;
+            }
+            $output = array($correct, count(($markingguide)));
+
+        }
+
+        $percentage = (($correct / count($markingguide)) * 100);
+
+        $studentscore = $correct;
+
+        $studentresult['score'] = $studentscore;
+        $studentresult['percentage'] = $percentage;
+        $studentresult->save();
+
+        return $studentresult;
 
     }
 
